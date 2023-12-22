@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 
-import os
-
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import cdist
-
-# import matplotlib.pyplot as plt
 
 total_parcels = 100
 min_weight, max_weight = 1, 60
@@ -33,9 +29,6 @@ volume = np.concatenate((large_parcels, small_parcels))
 parcels = pd.DataFrame({'parcel_id': np.arange(total_parcels), 'address_id': address_ids, 'weight': weight, 'volume': volume})
 
 
-# parcels
-
-
 total_addresses = total_parcels + 1
 
 upper_triangle = np.triu(np.random.randint(1, 30, size=(total_addresses, total_addresses)), 1)
@@ -46,9 +39,6 @@ distance_matrix = upper_triangle + lower_triangle
 
 
 distances = pd.DataFrame(distance_matrix)
-
-
-# distances
 
 
 total_vehicles = 8
@@ -89,14 +79,6 @@ couriers['max_volume'] = couriers.apply(assign_max_volume, axis=1)
 couriers['type'] = couriers.apply(assign_type, axis=1)
 
 
-# couriers
-
-
-# parcels.to_csv('parcels.csv')
-# distances.to_csv('distance.csv')
-# couriers.to_csv('couriers.csv')
-
-
 hub_coords = np.array([[0, 0]])
 
 
@@ -114,30 +96,9 @@ parcels['x'] = parcel_coords[:, 0]
 parcels['y'] = parcel_coords[:, 1]
 
 
-# distance
-
-
 parcels['distance_to_hub'] = distance.loc[0, 1:].reset_index(drop=True)
 
-
-parcels.sort_values('distance_to_hub')
 
 parcels.to_csv('delivery-data/parcels.csv')
 distance.to_csv('delivery-data/distance.csv')
 couriers.to_csv('delivery-data/couriers.csv')
-
-
-# x_mid = (parcels['x'].max() + parcels['x'].min()) / 2
-# y_mid = (parcels['y'].max() + parcels['y'].min()) / 2
-
-# upper_right = parcels[(parcels['x'] > x_mid) & (parcels['y'] > y_mid)]
-# lower_right = parcels[(parcels['x'] > x_mid) & (parcels['y'] <= y_mid)]
-# lower_left = parcels[(parcels['x'] <= x_mid) & (parcels['y'] <= y_mid)]
-# upper_left = parcels[(parcels['x'] <= x_mid) & (parcels['y'] > y_mid)]
-
-
-# plt.figure(figsize=(20, 12))
-# plt.scatter(parcels['x'], parcels['y'])
-# plt.axvline(x=x_mid, color='r')
-# plt.axhline(y=y_mid, color='r')
-# plt.show()
