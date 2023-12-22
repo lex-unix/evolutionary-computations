@@ -12,7 +12,7 @@ from src.lib.constants import FUNCTIONS_ND
 from src.lib.stats import Stats
 from src.lib.util import get_func_name
 
-alogorithms = {
+algorithms = {
     'evo_strategy': EvoStrategy,
     'diff_evolution': DifferentialEvolution,
     'symbiotic_optimisation': SymbioticOptimisation,
@@ -40,7 +40,7 @@ def main():
     params = selected_algo[cli.parameter]
     algo_config = selected_algo['default']
 
-    Algo = alogorithms[cli.algo]
+    Algo = algorithms[cli.algo]
     for func in test_functions:
         stats.objective = get_func_name(func)
         for param in params:
