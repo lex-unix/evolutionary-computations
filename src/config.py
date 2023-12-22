@@ -2,6 +2,8 @@ import argparse
 from dataclasses import dataclass
 from typing import Union
 
+import yaml
+
 
 @dataclass
 class CliConfig:
@@ -26,3 +28,8 @@ def read_cli() -> CliConfig:
     args = parser.parse_args()
 
     return CliConfig(**vars(args))
+
+
+def load_config():
+    with open('config.yaml') as file:
+        return yaml.load(file, Loader=yaml.FullLoader)
