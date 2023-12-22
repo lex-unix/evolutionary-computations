@@ -1,7 +1,7 @@
 output/
+notebooks/
 plots/
-/delivery-data/*.csv
-*.ipynb
+delivery-data/*.csv
 
 # ---- Python ----
 # Byte-compiled / optimized / DLL files
