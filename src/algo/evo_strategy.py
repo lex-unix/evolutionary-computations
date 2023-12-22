@@ -8,6 +8,7 @@ from numpy._typing import NDArray
 import src.lib.population_init as init
 from src.lib.common import Individ
 from src.lib.functions import Function
+from src.lib.stats import Stats
 
 
 def init_population(bounds, size) -> List[Individ]:
@@ -22,19 +23,19 @@ def init_population(bounds, size) -> List[Individ]:
 
 
 class EvoStrategy:
-    def __init__(self, lmda: int, mu: int, strategy: str, std: float, epochs=100):
+    def __init__(self, lmda: int, mu: int, strategy: str, std: float, stats: Stats, epochs: int = 100):
         self.lmda = lmda
         self.mu = mu
         self.strategy = strategy
         self.epochs = epochs
         self.std = std
         self.fitnesses = []
+        self.stats = stats
 
     def evaluate_population(self, population: List[Individ], objective: Function) -> List[Individ]:
         for individ in population:
             individ.fitness = objective.evaluate(individ.solutions)
-        sorted_population = sorted(
-            population, key=lambda x: x.fitness)[:self.mu]
+        sorted_population = sorted(population, key=lambda x: x.fitness)[: self.mu]
         return sorted_population
 
     def create_offspring(self, parent: Individ, bounds: NDArray) -> Individ:
@@ -60,7 +61,7 @@ class EvoStrategy:
         for epoch in range(self.epochs):
             offspring = []
             for individ in population:
-                for _ in range(self.lmda // self.mu):
+                for _ in range(self.lmda):
                     offspring.append(self.create_offspring(individ, objective.bounds))  # nopep8
 
             if self.strategy == "comma":
@@ -80,4 +81,5 @@ class EvoStrategy:
             best, best_solution = population[0].fitness, population[0].solutions
             self.collect_min_fitness(best)
 
+        self.stats.record_solution(x=best_solution, f=best, fitness_evolution=self.fitnesses)
         return best, best_solution

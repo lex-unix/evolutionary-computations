@@ -1,26 +1,29 @@
 from functools import partial
-from typing import List, Tuple
+from typing import List
+from typing import Tuple
 
 import numpy as np
 from numpy import random
 from numpy._typing import NDArray
 
 import src.lib.population_init as init
-from src.lib.common import Individ, get_random_indexes
+from src.lib.common import Individ
+from src.lib.common import get_random_indexes
 from src.lib.functions import Function
+from src.lib.stats import Stats
 
 
 class FractalStructurization:
-
-    def __init__(self, m: int = 7, t_max: float = 100, std: float = 0.1, size: int = 50, epochs: int = 20):
+    def __init__(self, stats: Stats, m: int = 7, temperature: float = 100, std: float = 0.1, size: int = 50, epochs: int = 20):
         self.size = size
         self.m = m
         self.epochs = epochs
         self.std = std
-        self.t_max = t_max
-        self.t = t_max
+        self.t_max = temperature
+        self.t = temperature
         self.L = 1
         self.fitnesses = []
+        self.stats = stats
 
     def solve(self, objective: Function):
         if len(objective.bounds) == 1:
@@ -83,12 +86,7 @@ class FractalStructurization:
 
     def population_w(self, population: List[Individ], objective: Function, fitness_avg: float):
         bounds_diff = self.bounds_diff(objective.bounds)
-        new_population = [
-            self.create_potential_individ(
-                individ, bounds_diff, objective, fitness_avg
-            )
-            for individ in population
-        ]
+        new_population = [self.create_potential_individ(individ, bounds_diff, objective, fitness_avg) for individ in population]
         return [individ for individ in new_population if individ is not None]
 
     def population_c(self, pairs: List[Tuple[Individ, Individ]], objective: Function):
@@ -98,13 +96,13 @@ class FractalStructurization:
             dims = len(objective.bounds)
             q = random.randint(0, dims)
             a, b = pair[0].solutions, pair[1].solutions
-            c = np.where(np.arange(dims) == q, (a + b) / 2, (r == -1)*a + (r == 1)*b)  # nopep8
+            c = np.where(np.arange(dims) == q, (a + b) / 2, (r == -1) * a + (r == 1) * b)  # nopep8
             population.append(Individ(c))
         return population
 
     def population_v(self, population: List[Individ], radii: NDArray, objective: Function, epoch: int):
         population_v = []
-        for individ,  r in zip(population, radii):
+        for individ, r in zip(population, radii):
             if len(objective.bounds) == 2:
                 population_v.append(self.generate_offspring_2d(individ, r))
             else:
@@ -113,11 +111,8 @@ class FractalStructurization:
 
     def generate_offspring_2d(self, individ: Individ, r: float) -> Individ:
         alpha = random.choice([-1, 1])
-        xh1 = random.uniform(
-            individ.solutions[0] - 3*self.L*r,
-            individ.solutions[0] + 3*self.L*r
-        )
-        xh2 = individ.solutions[1] + alpha * np.sqrt(abs(r**2 - (xh1 - individ.solutions[0])**2))  # nopep8
+        xh1 = random.uniform(individ.solutions[0] - 3 * self.L * r, individ.solutions[0] + 3 * self.L * r)
+        xh2 = individ.solutions[1] + alpha * np.sqrt(abs(r**2 - (xh1 - individ.solutions[0]) ** 2))  # nopep8
         return Individ(np.array([xh1, xh2]))
 
     def generate_offspring_nd(self, individ: Individ, r: float, objective: Function) -> Individ:
@@ -127,7 +122,7 @@ class FractalStructurization:
         mask = np.ones(dimms, np.bool_)
         mask[k] = 0
         a = individ.solutions[k] + random.choice([-1, 1])
-        b = r**2 - np.sum(new_solution[mask] - individ.solutions[mask])**2  # nopep8
+        b = r**2 - np.sum(new_solution[mask] - individ.solutions[mask]) ** 2  # nopep8
         new_solution[k] = a * b
         return Individ(new_solution)
 
@@ -146,12 +141,12 @@ class FractalStructurization:
             population_v = sorted(population_v, key=lambda x: x.fitness)
             fitness_avg = self.calculate_fitness_avg(population_v)
 
-            worst_pairs = self.form_pairs(population_v[self.size*6:])
+            worst_pairs = self.form_pairs(population_v[self.size * 6 :])
             population_w = self.population_w(self.pairs_average(worst_pairs), objective, fitness_avg)  # nopep8
 
             new_population = population_v + population_c + population_w
             self.evaluate_population(new_population, objective)
-            new_population = sorted(new_population, key=lambda x: x.fitness)[:self.size]  # nopep8
+            new_population = sorted(new_population, key=lambda x: x.fitness)[: self.size]  # nopep8
 
             _, best_fitness = self.get_best(new_population)
             self.collect_fitness(best_fitness)
@@ -163,7 +158,9 @@ class FractalStructurization:
 
             population = new_population
 
-        return self.get_best(population)
+        best, best_fitness = self.get_best(population)
+        self.stats.record_solution(x=best, f=best_fitness, fitness_evolution=self.fitnesses)
+        return best, best_fitness
 
     def _solve_2d(self, objective: Function):
         population = init.uniform_population(self.size, objective.bounds)
@@ -177,16 +174,16 @@ class FractalStructurization:
 
             self.evaluate_population(population_v, objective)
             population_v = sorted(population_v, key=lambda x: x.fitness)
-            fitness_avg = self.calculate_fitness_avg(population_v[:self.size])
+            fitness_avg = self.calculate_fitness_avg(population_v[: self.size])
 
-            best_pairs = self.form_pairs(population_v[:2*self.size])
-            worst_pairs = self.form_pairs(population_v[6*self.size:])
+            best_pairs = self.form_pairs(population_v[: 2 * self.size])
+            worst_pairs = self.form_pairs(population_v[6 * self.size :])
 
             population_best_2n = self.pairs_average(best_pairs)
             population_w = self.population_w(self.pairs_average(worst_pairs), objective, fitness_avg)  # nopep8
             new_population = population_v + population_best_2n + population_w
             self.evaluate_population(new_population, objective)
-            new_population = sorted(new_population, key=lambda x: x.fitness)[:self.size]  # nopep8
+            new_population = sorted(new_population, key=lambda x: x.fitness)[: self.size]  # nopep8
 
             _, best_fitness = self.get_best(new_population)
             self.collect_fitness(best_fitness)
@@ -200,7 +197,9 @@ class FractalStructurization:
 
             self.t /= 2
 
-        return self.get_best(population)
+        best, best_fitness = self.get_best(population)
+        self.stats.record_solution(x=best, f=best_fitness, fitness_evolution=self.fitnesses)
+        return best, best_fitness
 
     def _solve_1d(self, objective: Function):
         population = init.uniform_population(self.size, objective.bounds)
@@ -241,7 +240,7 @@ class FractalStructurization:
                 population_test.append(xh)
 
             combined_population = population + population_test
-            new_population = sorted(combined_population, key=lambda x: x.fitness)[:self.size]  # nopep8
+            new_population = sorted(combined_population, key=lambda x: x.fitness)[: self.size]  # nopep8
 
             _, best_fitness = self.get_best(new_population)
             self.collect_fitness(best_fitness)
@@ -253,4 +252,6 @@ class FractalStructurization:
 
             population = new_population
 
-        return self.get_best(population)
+        best, best_fitness = self.get_best(population)
+        self.stats.record_solution(x=best, f=best_fitness, fitness_evolution=self.fitnesses)
+        return best, best_fitness

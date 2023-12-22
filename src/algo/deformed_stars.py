@@ -1,7 +1,8 @@
 import copy
 from functools import partial
 from random import sample
-from typing import List, Tuple
+from typing import List
+from typing import Tuple
 
 import numpy as np
 from numpy import random
@@ -10,10 +11,21 @@ from numpy._typing import NDArray
 import src.lib.population_init as init
 from src.lib.common import Individ
 from src.lib.functions import Function
+from src.lib.stats import Stats
 
 
 class DeformedStars:
-    def __init__(self, k: int = 3, compression_rate: float = 4.0, std: float = 0.1, a: int = 3, size: int = 10, epochs: int = 50):
+    def __init__(
+        self,
+        stats: Stats,
+        k: int = 3,
+        compression_rate: float = 4.0,
+        std: float = 0.1,
+        a: int = 3,
+        size: int = 10,
+        epochs: int = 50,
+    ):
+        self.stats = stats
         self.size = size
         self.epochs = epochs
         self.compression_rate = compression_rate
@@ -143,7 +155,7 @@ class DeformedStars:
 
     def get_r_triangles(self, triangle: List[Individ], centroid: NDArray, min_point: Individ) -> List[Individ]:
         x = [point for point in triangle if point != min_point]
-        y_1 = (1 / (self.k-1)) * (self.k * min_point.solutions - centroid)
+        y_1 = (1 / (self.k - 1)) * (self.k * min_point.solutions - centroid)
         y_2 = (1 / self.k) * ((self.k - 1) * x[0].solutions + y_1)
         y_3 = (1 / self.k) * ((self.k - 1) * x[1].solutions + y_1)
         return [Individ(y_1), Individ(y_2), Individ(y_3)]
@@ -183,11 +195,12 @@ class DeformedStars:
             triangles_q = [self.get_q_triangle(t, objective) for t in triangles]  # nopep8
             triangles_u = [self.get_u_triangle(t, m) for t, m in zip(triangles, min_fitness_points)]  # nopep8
 
-            combined_population = [self.correct_bounds_nd(individ, objective) for triangle in (
-                triangles_r + triangles_q + triangles_u) for individ in triangle]
+            combined_population = [
+                self.correct_bounds_nd(individ, objective) for triangle in (triangles_r + triangles_q + triangles_u) for individ in triangle
+            ]
 
             self.evaluate_population(combined_population, objective)
-            new_population = sorted(combined_population, key=lambda x: x.fitness)[:self.size]  # nopep8
+            new_population = sorted(combined_population, key=lambda x: x.fitness)[: self.size]  # nopep8
 
             _, best_fitness = self.get_best(new_population)
             self.collect_fitness(best_fitness)
@@ -199,7 +212,9 @@ class DeformedStars:
 
             population = new_population
 
-        return self.get_best(population)
+        best, best_fitness = self.get_best(population)
+        self.stats.record_solution(x=best, f=best_fitness, fitness_evolution=self.fitnesses)
+        return best, best_fitness
 
     def _solve_2d(self, objective: Function):
         population = init.uniform_population(self.size, objective.bounds)
@@ -249,7 +264,7 @@ class DeformedStars:
             self.evaluate_population(population_w, objective)
 
             combined_population = population_z + population_s + population_w  # nopep8
-            new_population = sorted(combined_population, key=lambda x: x.fitness)[:self.size]  # nopep8
+            new_population = sorted(combined_population, key=lambda x: x.fitness)[: self.size]  # nopep8
 
             _, best_fitness = self.get_best(new_population)
             self.collect_fitness(best_fitness)
@@ -261,7 +276,9 @@ class DeformedStars:
 
             population = new_population
 
-        return self.get_best(population)
+        best, best_fitness = self.get_best(population)
+        self.stats.record_solution(x=best, f=best_fitness, fitness_evolution=self.fitnesses)
+        return best, best_fitness
 
     def _solve_1d(self, objective: Function):
         bounds = objective.bounds
@@ -277,9 +294,9 @@ class DeformedStars:
             for individ in population_t:
                 new_x = individ.solutions + random.randn() * self.std
                 if new_x < bounds[0, 0]:
-                    new_x += (bounds[0, 0] - bounds[0, 1])
+                    new_x += bounds[0, 0] - bounds[0, 1]
                 if new_x > bounds[0, 1]:
-                    new_x += (bounds[0, 1] - bounds[0, 0])
+                    new_x += bounds[0, 1] - bounds[0, 0]
                 population_z.append(Individ(new_x))
 
             self.evaluate_population(population_z, objective)
@@ -292,7 +309,7 @@ class DeformedStars:
 
             self.evaluate_population(population_s, objective)
             combined_population = population_t + population_z + population_s
-            new_population = sorted(combined_population, key=lambda x: x.fitness)[:self.size]  # nopep8
+            new_population = sorted(combined_population, key=lambda x: x.fitness)[: self.size]  # nopep8
 
             _, best_fitness = self.get_best(population_t)
             self.collect_fitness(best_fitness)
@@ -304,4 +321,6 @@ class DeformedStars:
 
             population_t = new_population
 
-        return self.get_best(population_t)
+        best, best_fitness = self.get_best(population_t)
+        self.stats.record_solution(x=best, f=best_fitness, fitness_evolution=self.fitnesses)
+        return best, best_fitness

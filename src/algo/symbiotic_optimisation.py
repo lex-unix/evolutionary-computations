@@ -1,6 +1,7 @@
 import copy
 from functools import partial
-from typing import Callable, List
+from typing import Callable
+from typing import List
 
 import numpy as np
 from numpy import random
@@ -9,15 +10,17 @@ from numpy._typing import NDArray
 import src.lib.population_init as init
 from src.lib.common import Individ
 from src.lib.functions import Function
+from src.lib.stats import Stats
 
 
 class SymbioticOptimisation:
-    def __init__(self, bf1: int, bf2: int, epochs: int = 100, size: int = 100):
+    def __init__(self, bf1: int, bf2: int, stats: Stats, epochs: int = 100, size: int = 100):
         self.bf1 = bf1
         self.bf2 = bf2
         self.epochs = epochs
         self.size = size
         self.fitnesses = []
+        self.stats = stats
 
     def set_stop_criteria(self, stop_criteria: Callable[List[Individ], List[Individ]], e: float):
         if stop_criteria is not None:
@@ -95,4 +98,5 @@ class SymbioticOptimisation:
         population = self.evaluate_population(population, objective)
         best, best_solution = population[0].fitness, population[0].solutions
         self.collect_best_fitness(best)
+        self.stats.record_solution(x=best_solution, f=best, fitness_evolution=self.fitnesses)
         return best, best_solution

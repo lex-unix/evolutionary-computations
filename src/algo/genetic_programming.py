@@ -1,12 +1,15 @@
 import copy
 import random
 from collections import deque
-from typing import Callable, Dict, List, Tuple
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Tuple
 
 import numpy as np
 
 
-class GeneticExpression:
+class GeneticProgramming:
     def __init__(
         self,
         terminals: List[str],

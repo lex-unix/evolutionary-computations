@@ -2,14 +2,16 @@ import numpy as np
 from numpy import random
 
 from src.lib.functions import Function
+from src.lib.stats import Stats
 
 
 class SimulatedAnnealing:
-    def __init__(self, t: float, std: float, epochs: int = 500):
-        self.t = t
+    def __init__(self, temperature: float, std: float, stats: Stats, epochs: int = 500):
+        self.t = temperature
         self.std = std
         self.epochs = epochs
         self.costs = []
+        self.stats = stats
 
     def collect_cost(self, cost: float):
         self.costs.append(cost)
@@ -36,4 +38,5 @@ class SimulatedAnnealing:
                 curr_cost = new_cost
                 self.collect_cost(curr_cost)
 
+        self.stats.record_solution(x=curr_state, f=curr_cost, fitness_evolution=self.costs)
         return curr_state, curr_cost

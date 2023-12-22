@@ -1,5 +1,6 @@
 from functools import partial
-from typing import Callable, List
+from typing import Callable
+from typing import List
 
 import numpy as np
 from numpy import random
@@ -8,15 +9,17 @@ from numpy._typing import NDArray
 import src.lib.population_init as init
 from src.lib.common import Individ
 from src.lib.functions import Function
+from src.lib.stats import Stats
 
 
 class DifferentialEvolution:
-    def __init__(self, f: float, epochs: int = 100, size: int = 100, crossover_rate: float = 0.3):
+    def __init__(self, stats: Stats, f: float, epochs: int = 100, size: int = 100, crossover_rate: float = 0.3):
         self.epochs = epochs
         self.size = size
         self.crossover_rate = crossover_rate
         self.f = f
         self.fitnesses = []
+        self.stats = stats
 
     def set_stop_criteria(self, stop_criteria: Callable[List[Individ], List[Individ]], e: float):
         if stop_criteria is not None:
@@ -90,4 +93,5 @@ class DifferentialEvolution:
             self.collect_min_fitness(best.fitness)
 
         best = sorted(population, key=lambda x: x.fitness)[0]
+        self.stats.record_solution(x=best.fitness, f=best.solutions, fitness_evolution=self.fitnesses)
         return best.fitness, best.solutions
