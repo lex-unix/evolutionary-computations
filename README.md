@@ -107,7 +107,29 @@ To create a graph and save it in the results directory:
 python main.py -a symbiotic_optimization -p bf1 --plot --save-plot
 ```
 
-## Parcel Delivery & Cost Calculation
+### Configuration file
+
+This project uses a YAML configuration file to set various parameters for different optimization algorithms.
+
+The file consists of multiple sections, each representing an optimization algorithm.
+Each section consists of `default` parameters and parameters to test.
+
+Consider the following configuration for Symbiotic Optimization algorithm:
+
+```yaml
+symbiotic_optimisation:
+  default:
+    bf1: 1
+    bf2: 2
+  bf1: [1, 2]
+  bf2: [1, 2]
+```
+
+Running the command `python main.py -a symbiotic_optimization -p bf1` will initiate the
+Symbiotic Optimization algorithm, preloading default values for all parameters except `bf1`.
+In this context, `bf1` will encompass an array of test values, specifically [1, 2].
+
+## Parcel delivery & cost calculation
 
 The program in the "delivery" directory is designed to manage and optimize logistics operations
 by utilizing the ACO algorithm. It reads data about parcels, couriers, and distances,
@@ -116,7 +138,7 @@ calculates the minimum delivery cost, considering variables such as courier sala
 walking speeds, and fuel costs. The output provides details of parcel-courier assignments, each courier's delivery
 costs, and the total cost for all deliveries
 
-### How It Works
+### How it works
 
 The script divides the given area into four sector based on `x` and `y` coordinates with the delivery hub
 at the center. Couriers are then assigned to their respective sectors. Parcels are assigned to couriers who have
