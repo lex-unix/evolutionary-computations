@@ -1,5 +1,8 @@
 import os
-from typing import Dict, List, Literal, Union
+from typing import Dict
+from typing import List
+from typing import Literal
+from typing import Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -20,6 +23,14 @@ class Stats:
         self._objective = ''
 
     @property
+    def param_value(self):
+        return self._param_value
+
+    @param_value.setter
+    def param_value(self, param_value: Union[str, int]):
+        self._param_value = param_value
+
+    @property
     def objective(self):
         return self._objective
 
@@ -27,12 +38,12 @@ class Stats:
     def objective(self, objective: str):
         self._objective = objective
 
-    def collect_data(self, x: NDArray, f: float, fitness_evolution: List[float], param_value: Union[int, float, str]):
+    def record_solution(self, x: NDArray, f: float, fitness_evolution: List[float]):
         entry = {
-            'param_value': param_value,
             'x': util.round(x),
             'f': util.round(f),
-            'fitness_evolution': fitness_evolution
+            'fitness_evolution': fitness_evolution,
+            'param_value': self._param_value,
         }
         self._results.append(entry)
 
@@ -82,12 +93,7 @@ class Stats:
     def _export(self):
         df = pd.DataFrame(self._results)
         df.drop('fitness_evolution', axis=1, inplace=True)
-        df.rename(
-            columns={
-                'param_value': self._param_name
-            },
-            inplace=True
-        )
+        df.rename(columns={'param_value': self._param_name}, inplace=True)
         file_path = os.path.join('output', self._get_filename())
         if not util.dir_exist('output'):
             util.create_dir('output')
