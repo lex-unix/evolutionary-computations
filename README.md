@@ -15,7 +15,7 @@ This repository includes 8 methods for function optimization:
 - Fractal structurization
 - Simulated Annealing
 
-You can also find Genetic Programming (GP) and Ant Colony Optimization algorithm (ACO) with such variations:
+You can also find Genetic Programming (GP) algorithm and Ant Colony Optimization (ACO) algorithm with such variations:
 
 - AS
 - MMAS
@@ -107,7 +107,7 @@ To create a graph and save it in the results directory:
 python main.py -a symbiotic_optimization -p bf1 --plot --save-plot
 ```
 
-# Parcel Delivery & Cost Calculation
+## Parcel Delivery & Cost Calculation
 
 The program in the "delivery" directory is designed to manage and optimize logistics operations
 by utilizing the ACO algorithm. It reads data about parcels, couriers, and distances,
@@ -116,7 +116,7 @@ calculates the minimum delivery cost, considering variables such as courier sala
 walking speeds, and fuel costs. The output provides details of parcel-courier assignments, each courier's delivery
 costs, and the total cost for all deliveries
 
-## How It Works
+### How It Works
 
 The script divides the given area into four sector based on `x` and `y` coordinates with the delivery hub
 at the center. Couriers are then assigned to their respective sectors. Parcels are assigned to couriers who have
@@ -126,7 +126,7 @@ For couriers who have more than 1 assigned parcel, Ant Colony Optimization is us
 Traveling Salesman Problem (TSP), intending to minimize the delivery cost. For couriers with only
 one parcel, the delivery cost derives straightforward from the distance.
 
-## Prerequisite
+### Prerequisite
 
 Prior to executing the program, it is necessary to generate the required data.
 The script responsible for generating said data is located in the `scripts` directory.
@@ -144,7 +144,7 @@ Then execute the script:
 
 Data will be generated in the `delivery-data` directory.
 
-## Usage
+### Usage
 
 You can run the program with this command:
 
