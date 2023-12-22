@@ -21,12 +21,28 @@ algorithms = {
     'deformed_stars': DeformedStars,
 }
 
+functions = {1: FUNCTIONS_1D, 2: FUNCTIONS_2D, 'nd': FUNCTIONS_ND}
+
 
 def main():
     cli = read_cli()
     config = load_config()
 
-    test_functions = FUNCTIONS_1D if cli.dimension == 1 else FUNCTIONS_2D if cli.dimension == 2 else FUNCTIONS_ND
+    if cli.algo not in algorithms.keys():
+        raise KeyError(f"Algorithm '{cli.algo}' not found in predefined algorithms.")
+
+    selected_algo = config[cli.algo]
+
+    available_params = list(config[cli.algo].keys())
+    available_params.remove('default')
+    if cli.parameter not in available_params:
+        raise KeyError(f"Parameter '{cli.parameter}' not found for algorithm '{cli.algo}'. Available parameter: {available_params}")
+
+    params = selected_algo[cli.parameter]
+    algo_config = selected_algo['default']
+
+    Algo = algorithms[cli.algo]
+    test_functions = functions.get(cli.dimension, functions['nd'])
 
     stats = Stats(
         algo=cli.algo,
@@ -36,11 +52,6 @@ def main():
         export_format=cli.output,
     )
 
-    selected_algo = config[cli.algo]
-    params = selected_algo[cli.parameter]
-    algo_config = selected_algo['default']
-
-    Algo = algorithms[cli.algo]
     for func in test_functions:
         stats.objective = get_func_name(func)
         for param in params:
