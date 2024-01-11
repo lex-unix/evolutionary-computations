@@ -2,6 +2,9 @@
 line-length = 140
 ignore = ["E741", "E203"]
 
+[tool.ruff.lint]
+extend-select = ["UP019", "I001"]
+
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
