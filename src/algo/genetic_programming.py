@@ -63,7 +63,7 @@ class GeneticProgramming:
                     args -= 1
             exec_queue = deque()
             for symbol in list(queue):
-                if symbol == "a":
+                if symbol == 'a':
                     exec_queue.append(value)
                 if symbol in self.function_symbols:
                     args = 2

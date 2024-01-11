@@ -1,7 +1,11 @@
-[tool.black]
+[tool.ruff]
 line-length = 140
-skip-string-normalization = true
+ignore = ["E741", "E203"]
 
-[tool.isort]
-profile = "black"
-force_single_line = true
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.ruff.lint.isort]
+force-single-line = true
