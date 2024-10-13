@@ -2,8 +2,6 @@
 
 This is a collection of algorithms I studied at my university for the Evolutionary Computation course.
 
-## Contents
-
 This repository includes 8 methods for function optimization:
 
 - Genetic algorithm
@@ -20,6 +18,19 @@ You can also find Genetic Programming (GP) algorithm and Ant Colony Optimization
 - AS
 - MMAS
 - ACS
+
+## Table of Contents
+
+- [Usage](#usage)
+  - [Installing dependencies](#installing-dependencies)
+  - [Running tests](#running-tests)
+- [Test functions](#test-functions)
+- [Additional parameters](#additional-parameters)
+  - [Configuration file](#configuration-file)
+- [Parcel delivery and cost calculation](#parcel-delivery-and-cost-calculation)
+  - [How it works](#how-it-works)
+  - [Prerequisite](#prerequisite)
+  - [How to use](#how-to-use)
 
 ## Usage
 
@@ -129,7 +140,7 @@ Running the command `python main.py -a symbiotic_optimization -p bf1` will initi
 Symbiotic Optimization algorithm, preloading default values for all parameters except `bf1`.
 In this context, `bf1` will encompass an array of test values, specifically [1, 2].
 
-## Parcel delivery & cost calculation
+## Parcel delivery and cost calculation
 
 The program in the "delivery" directory is designed to manage and optimize logistics operations
 by utilizing the ACO algorithm. It reads data about parcels, couriers, and distances,
@@ -166,7 +177,7 @@ Then execute the script:
 
 Data will be generated in the `delivery-data` directory.
 
-### Usage
+### How to use
 
 You can run the program with this command:
 
