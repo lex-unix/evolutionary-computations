@@ -1,6 +1,6 @@
 import os
 import time
-from typing import Union
+from typing import Callable
 
 import numpy as np
 from numpy._typing import NDArray
@@ -15,15 +15,15 @@ def start_timer():
     return stop_timer
 
 
-def get_func_name(func):
+def get_func_name(func: Callable) -> str:
     return type(func).__name__
 
 
-def get_class_name(obj):
+def get_class_name(obj) -> str:
     return obj.__class__.__name__
 
 
-def round(a: Union[NDArray, float], decimals: int = 5):
+def round(a: NDArray | float, decimals: int = 5):
     return np.round(a, decimals=decimals)
 
 
