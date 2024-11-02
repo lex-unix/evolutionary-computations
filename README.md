@@ -22,15 +22,9 @@ You can also find Genetic Programming (GP) algorithm and Ant Colony Optimization
 ## Table of Contents
 
 - [Usage](#usage)
-  - [Installing dependencies](#installing-dependencies)
-  - [Running tests](#running-tests)
 - [Test functions](#test-functions)
 - [Additional parameters](#additional-parameters)
-  - [Configuration file](#configuration-file)
 - [Parcel delivery and cost calculation](#parcel-delivery-and-cost-calculation)
-  - [How it works](#how-it-works)
-  - [Prerequisite](#prerequisite)
-  - [How to use](#how-to-use)
 
 ## Usage
 
