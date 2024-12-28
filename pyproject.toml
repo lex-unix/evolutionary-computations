@@ -1,5 +1,5 @@
 [tool.ruff]
-line-length = 140
+line-length = 100
 ignore = ["E741", "E203"]
 
 [tool.ruff.lint]
@@ -12,3 +12,6 @@ docstring-code-format = true
 
 [tool.ruff.lint.isort]
 force-single-line = true
+
+[tool.mypy]
+plugins = "numpy.typing.mypy_plugin"
