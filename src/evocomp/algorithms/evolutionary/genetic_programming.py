@@ -103,10 +103,10 @@ class GeneticProgramming:
         if self.recombination_rate < random.random():
             return chromo_a, chromo_b
         point = random.choice(np.arange(self.head_len))
-        chromo_a = ''.join([''.join(gene) for gene in chromo_a])
-        chromo_b = ''.join([''.join(gene) for gene in chromo_b])
-        new_chromo_a = chromo_a[:point] + chromo_b[point:]
-        new_chromo_b = chromo_b[:point] + chromo_a[point:]
+        chromo_str_a = ''.join([''.join(gene) for gene in chromo_a])
+        chromo_str_b = ''.join([''.join(gene) for gene in chromo_b])
+        new_chromo_a = chromo_str_a[:point] + chromo_str_b[point:]
+        new_chromo_b = chromo_str_b[:point] + chromo_str_a[point:]
         return self.split_to_genes(new_chromo_a), self.split_to_genes(new_chromo_b)
 
     def gene_recombination(self, chromo_a: List[List[str]], chromo_b: List[List[str]]):
@@ -135,7 +135,11 @@ class GeneticProgramming:
         slice_point_b = np.random.choice(np.arange(self.head_len - self.shift_len))
         gene_a_slice = new_chromosome[gene_a][slice_point_a : slice_point_a + self.shift_len]
         gene_b_head = new_chromosome[gene_b][: self.head_len]
-        gene_b_head = gene_b_head[:slice_point_b] + gene_a_slice + gene_b_head[slice_point_b + self.shift_len : self.head_len]
+        gene_b_head = (
+            gene_b_head[:slice_point_b]
+            + gene_a_slice
+            + gene_b_head[slice_point_b + self.shift_len : self.head_len]
+        )
         new_gene_b = gene_b_head + new_chromosome[gene_b][self.head_len :]
         new_chromosome[gene_b] = new_gene_b
         return new_chromosome
@@ -160,7 +164,10 @@ class GeneticProgramming:
         if shift_len == 0:
             return chromosome
 
-        gene_head = gene_head[slice_point : slice_point + shift_len] + gene_head[: self.head_len - shift_len]
+        gene_head = (
+            gene_head[slice_point : slice_point + shift_len]
+            + gene_head[: self.head_len - shift_len]
+        )
 
         new_gene = gene_head + new_chromosome[gene][self.head_len :]
         new_chromosome[gene] = new_gene
@@ -170,7 +177,10 @@ class GeneticProgramming:
     def tournament_selection(self, population, train_data):
         candidates = [self.join_chromosome(chromosome) for chromosome in population]
         tournament = np.random.choice(candidates, size=self.tournament_size)
-        tournament_fitnesses = [sum(self.error(self.split_to_genes(chromosome), x, y) for x, y in train_data) for chromosome in tournament]
+        tournament_fitnesses = [
+            sum(self.error(self.split_to_genes(chromosome), x, y) for x, y in train_data)
+            for chromosome in tournament
+        ]
         best_index = np.argmin(tournament_fitnesses)
         return self.split_to_genes(tournament[best_index])
 
@@ -180,7 +190,7 @@ class GeneticProgramming:
     def solve(self, train_data: List[Tuple[float, float]]):
         population = self.init_population()
         best_fitness, best_chromo = None, None
-        fitnesses = []
+        fitnesses: list[float] = []
         for epoch in range(self.epochs):
             if epoch % 10 == 0 and fitnesses:
                 print(f'Epoch: {epoch}, fitness: {min(fitnesses)}')
@@ -200,8 +210,13 @@ class GeneticProgramming:
                 new_population.append(chromo_a)
                 new_population.append(chromo_b)
 
-            population = [self.tournament_selection(new_population, train_data) for _ in range(self.size)]
-            fitnesses = [sum(self.error(chromosome, x, y) for x, y in train_data) for chromosome in population]
+            population = [
+                self.tournament_selection(new_population, train_data) for _ in range(self.size)
+            ]
+            fitnesses = [
+                sum(self.error(chromosome, x, y) for x, y in train_data)
+                for chromosome in population
+            ]
 
             if best_fitness is None or min(fitnesses) < best_fitness:
                 min_fitness_idx = np.argmin(fitnesses)

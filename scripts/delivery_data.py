@@ -26,7 +26,14 @@ small_parcels = np.random.randint(min_volume, 5, size=total_small_parcels)
 volume = np.concatenate((large_parcels, small_parcels))
 
 
-parcels = pd.DataFrame({'parcel_id': np.arange(total_parcels), 'address_id': address_ids, 'weight': weight, 'volume': volume})
+parcels = pd.DataFrame(
+    {
+        'parcel_id': np.arange(total_parcels),
+        'address_id': address_ids,
+        'weight': weight,
+        'volume': volume,
+    }
+)
 
 
 total_addresses = total_parcels + 1
@@ -53,7 +60,10 @@ couriers = pd.DataFrame(
     {
         'courier_id': np.arange(total_vehicles + total_pedestrian_couriers),
         'max_weight': np.concatenate(
-            (np.full(total_vehicles, max_vehicle_weight), np.full(total_pedestrian_couriers, max_pedestrian_weight))
+            (
+                np.full(total_vehicles, max_vehicle_weight),
+                np.full(total_pedestrian_couriers, max_pedestrian_weight),
+            )
         ),
     }
 )
@@ -99,6 +109,6 @@ parcels['y'] = parcel_coords[:, 1]
 parcels['distance_to_hub'] = distance.loc[0, 1:].reset_index(drop=True)
 
 
-parcels.to_csv('delivery-data/parcels.csv')
-distance.to_csv('delivery-data/distance.csv')
-couriers.to_csv('delivery-data/couriers.csv')
+parcels.to_csv('out/delivery/parcels.csv')
+distance.to_csv('out/delivery/distance.csv')
+couriers.to_csv('out/delivery/couriers.csv')

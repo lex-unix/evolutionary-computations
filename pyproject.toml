@@ -1,3 +1,29 @@
+[project]
+name = "evocomp"
+version = "0.1.0"
+authors = [{ name = "Lex Miiin", email = "hello@lexunix.me" }]
+description = "Evolutionary algorithms implementation"
+readme = "README.md"
+requires-python = ">=3.9"
+dynamic = ["dependencies"]
+
+[build-system]
+requires = ["hatchling>=1.12.1", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+dev-mode-dirs = ["src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/evocomp", "src/delivery"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/evocomp" = ["py.typed", "**/*.py"]
+"src/delivery" = ["py.typed", "**/*.py"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.ruff]
 line-length = 100
 ignore = ["E741", "E203"]

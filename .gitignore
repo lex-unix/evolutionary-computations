@@ -1,7 +1,4 @@
-output/
-notebooks/
-plots/
-delivery-data/*.csv
+/notebooks/
 
 # ---- Python ----
 # Byte-compiled / optimized / DLL files
@@ -165,3 +162,5 @@ cython_debug/
 #.idea/
 
 /.direnv/
+/out/**/*
+!/out/.gitkeep
