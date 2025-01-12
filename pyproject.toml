@@ -5,7 +5,13 @@ authors = [{ name = "Lex Miiin", email = "hello@lexunix.me" }]
 description = "Evolutionary algorithms implementation"
 readme = "README.md"
 requires-python = ">=3.9"
-dynamic = ["dependencies"]
+dependencies = [
+  "matplotlib>=3.8.0",
+  "numpy>=1.26.0",
+  "openpyxl>=3.1.2",
+  "pandas>=2.1.1",
+  "scipy>=1.11.4",
+]
 
 [build-system]
 requires = ["hatchling>=1.12.1", "hatch-vcs"]
