@@ -12,14 +12,35 @@ from evocomp.core.optimizer import Optimizer
 
 
 class FractalStructurization(Optimizer):
+    """Fractal Structurization algorithm for global optimization.
+
+    This algorithm combines elements of simulated annealing with population-based
+    search using three distinct population types:
+    - V-population: Generated through local perturbations with decreasing radius
+    - C-population: Created by combining pairs of solutions with random dimension selection
+    - W-population: Formed using mean pairs and temperature-based acceptance
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        m: Parameter affecting local search intensity. Higher values lead to
+            more thorough local exploration.
+        temperature: Initial temperature for simulated annealing component.
+            Controls acceptance probability of worse solutions.
+        epochs: Maximum number of iterations.
+        size: Population size. Algorithm maintains three sub-populations,
+            total working population will be larger.
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs.
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],
         m: int = 7,
         temperature: float = 100,
         std: float = 0.1,
-        size: int = 50,
         epochs: int = 20,
+        size: int = 50,
         halt_criteria: HaltCriteria | None = None,
     ):
         super().__init__(epochs, operation, halt_criteria)

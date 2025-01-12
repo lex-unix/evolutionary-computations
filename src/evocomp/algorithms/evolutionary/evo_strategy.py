@@ -1,7 +1,6 @@
 from typing import Literal
 
 import numpy as np
-from numpy import random
 from numpy.typing import NDArray
 
 from evocomp.core.candidate import Candidate
@@ -11,10 +10,36 @@ from evocomp.core.optimizer import Optimizer
 
 
 class EvoStrategy(Optimizer):
+    """Evolution Strategy (ES) algorithm for global optimization.
+
+    ES is a population-based algorithm that uses mutation and selection as its main operators.
+    It follows either (μ + λ) or (μ, λ) selection strategy, where μ is the number of parents
+    and λ is the number of offspring.
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        lmda: Number of offspring (λ) to generate per parent.
+            Total offspring population will be μ × λ.
+        mu: Number of parents (μ) to select for next generation.
+            Represents population size.
+        std: Standard deviation for Gaussian mutation.
+            Controls mutation step size.
+        strategy: Selection strategy ('plus' or 'comma').
+            'plus': (μ + λ) selection, parents compete with offspring.
+            'comma': (μ, λ) selection, only offspring are selected.
+        epochs: Maximum number of iterations.
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs.
+
+    Note:
+        - 'plus' strategy is more elitist and preserves best solutions
+        - 'comma' strategy allows escaping local optima more easily
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],
-        lmda: int = 100,
+        lmda: int = 10,
         mu: int = 20,
         std: float = 0.5,
         strategy: Literal['comma', 'plus'] = 'plus',
@@ -38,21 +63,14 @@ class EvoStrategy(Optimizer):
         return sorted_population
 
     def __create_offspring(self, parent: Candidate, bounds: NDArray) -> Candidate:
-        child_solution = parent.solution + self.std * random.randn(2)
-        for i in range(len(child_solution)):
-            child_solution[i] = np.clip(child_solution[i], bounds[i][0], bounds[i][1])
+        child_solution = parent.solution + self.std * np.random.randn(len(bounds))
+        child_solution = np.clip(child_solution, bounds[:, 0], bounds[:, 1])
         return Candidate(child_solution)
 
     def generate_init_population(self, objective: Objective) -> list[Candidate]:
         bounds = objective.bounds
-        x_bounds, y_bounds = bounds
-        population = []
-        for _ in range(self.mu):
-            x = random.uniform(x_bounds[0], x_bounds[1])
-            y = random.uniform(y_bounds[0], y_bounds[1])
-            candidate = Candidate(np.asarray([x, y]))
-            population.append(candidate)
-        return population
+        solutions = np.random.uniform(bounds[:, 0], bounds[:, 1], size=(self.mu, len(bounds)))
+        return [Candidate(solution) for solution in solutions]
 
     def compute_next_population(
         self,

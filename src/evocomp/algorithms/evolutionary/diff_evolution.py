@@ -11,13 +11,31 @@ from evocomp.core.optimizer import Optimizer
 
 
 class DifferentialEvolution(Optimizer):
+    """Differential Evolution (DE) algorithm for global optimization.
+
+    DE is a population-based optimization algorithm that uses vector differences
+    for perturbing the vector population.
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        f: Differential weight (mutation factor) in range [0, 2].
+            Controls the amplification of differential variation.
+        crossover_rate: Probability of crossover in range [0, 1].
+            Higher values increase exploration.
+        epochs: Maximum number of iterations.
+        size: Population size. Larger populations provide better exploration
+            but require more function evaluations.
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs.
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],
         f: float,
+        crossover_rate: float = 0.3,
         epochs: int = 100,
         size: int = 100,
-        crossover_rate: float = 0.3,
         halt_criteria: HaltCriteria | None = None,
     ):
         super().__init__(epochs, operation, halt_criteria)

@@ -8,6 +8,27 @@ from evocomp.core.objective import Objective
 
 
 class Optimizer(ABC):
+    """Abstract base class for optimization algorithms.
+
+    This class provides a common interface and basic functionality for all
+    optimization algorithms.
+
+    Args:
+        epochs: Maximum number of iterations. Ignored if halt_criteria is provided.
+        operation: Direction of optimization ('min' or 'max').
+            - 'min': Find minimum value of objective function
+            - 'max': Find maximum value of objective function
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs. If provided, epochs parameter
+            is ignored and algorithm runs until convergence.
+
+    Note:
+        - Subclasses must implement the optimization logic
+        - History of best solutions is automatically tracked
+        - Can run either for fixed number of epochs or until convergence
+        - Use best_candidate property to access final solution
+    """
+
     def __init__(
         self,
         epochs: int,
@@ -21,14 +42,17 @@ class Optimizer(ABC):
 
     @property
     def best_candidate(self) -> Candidate:
+        """Returns the best solution found during optimization."""
         return self.__history[-1]
 
     @property
     def epochs(self) -> int:
+        """Returns the number of epochs completed during optimization."""
         return len(self.__history) - 1
 
     @property
     def history(self) -> list[Candidate]:
+        """Returns the history of best solutions for each iteration."""
         return self.__history.copy()
 
     @abstractmethod
@@ -44,6 +68,19 @@ class Optimizer(ABC):
         pass
 
     def optimize(self, objective: Objective) -> Candidate:
+        """Run optimization process on the given objective function.
+
+        Args:
+            objective: The objective function to optimize. Must implement
+                the Objective interface with bounds and evaluate method.
+
+        Returns:
+            The best candidate solution found during optimization.
+
+        Note:
+            - Solution history is recorded and accessible via .history
+            - Best solution at any point is available via .best_candidate
+        """
         population = self.generate_init_population(objective)
         self.__record_solutions(population)
         epoch = 0

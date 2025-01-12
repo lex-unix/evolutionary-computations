@@ -10,17 +10,38 @@ from evocomp.core.optimizer import Optimizer
 
 
 class BeeColony(Optimizer):
+    """Artificial Bee Colony (ABC) algorithm for global optimization.
+
+    ABC simulates the foraging behavior of honey bees. The colony consists of three types
+    of bees: employed bees, onlooker bees, and scout bees. Each employed bee is associated
+    with a food source and shares information with onlooker bees. Scout bees search for
+    new food sources when current ones are exhausted.
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        max_stagnation: Maximum number of iterations without improvement before
+            abandoning a food source.
+        epochs: Maximum number of iterations.
+        size: Colony size (number of employed bees). Total population will be
+            2 × size (employed + onlooker bees).
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs.
+
+    Note:
+        - Lower max_stagnation values increase exploration
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],
         max_stagnation=10,
-        size=100,
         epochs=100,
+        size=100,
         halt_criteria: HaltCriteria | None = None,
     ):
         super().__init__(epochs, operation, halt_criteria)
-        self.size = size
-        self.max_stagnation = max_stagnation
+        self.__size = size
+        self.__max_stagnation = max_stagnation
         self.__stagnation_count = [0] * size
 
     def __fiti(self, bee: Candidate) -> float:
@@ -30,7 +51,7 @@ class BeeColony(Optimizer):
 
     def __food_source(self, population: list[Candidate], current_index: int) -> np.ndarray:
         current_solution = population[current_index].solution
-        idx_pool = np.delete(np.arange(self.size), current_index)
+        idx_pool = np.delete(np.arange(self.__size), current_index)
         random_bee: Candidate = population[random.choice(idx_pool)]
 
         phi = random.uniform(-1, 1, size=len(current_solution))
@@ -39,7 +60,7 @@ class BeeColony(Optimizer):
         return new_solution
 
     def __employed_bee_phase(self, population: list[Candidate], objective: Objective):
-        for i in range(self.size):
+        for i in range(self.__size):
             bee = population[i]
             new_solution = self.__food_source(population, i)
             new_solution = np.clip(new_solution, objective.bounds[:, 0], objective.bounds[:, 1])
@@ -53,7 +74,7 @@ class BeeColony(Optimizer):
         fitis = np.array([self.__fiti(bee) for bee in population])
         probabilities = fitis / np.sum(fitis)
 
-        for i in range(self.size):
+        for i in range(self.__size):
             if random.random() < probabilities[i]:
                 new_solution = self.__food_source(population, i)
                 new_solution = np.clip(new_solution, objective.bounds[:, 0], objective.bounds[:, 1])
@@ -65,9 +86,9 @@ class BeeColony(Optimizer):
 
     def __scout_bee_phase(self, population: list[Candidate], objective: Objective):
         best_bee = min(population, key=lambda x: x.fitness)
-        for i in range(self.size):
+        for i in range(self.__size):
             if population[i].fitness == best_bee.fitness:
-                if self.__stagnation_count[i] >= self.max_stagnation:
+                if self.__stagnation_count[i] >= self.__max_stagnation:
                     new_solution = random.uniform(
                         objective.bounds[:, 0],
                         objective.bounds[:, 1],
@@ -82,7 +103,7 @@ class BeeColony(Optimizer):
 
     def generate_init_population(self, objective: Objective) -> list[Candidate]:
         population = []
-        for _ in range(self.size):
+        for _ in range(self.__size):
             solution = random.uniform(objective.bounds[:, 0], objective.bounds[:, 1])
             fitness = objective.evaluate(solution)
             population.append(Candidate(solution, fitness))

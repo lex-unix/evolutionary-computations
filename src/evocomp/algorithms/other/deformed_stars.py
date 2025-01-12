@@ -13,21 +13,39 @@ from evocomp.core.optimizer import Optimizer
 
 
 class DeformedStars(Optimizer):
+    """Deformed Stars algorithm for global optimization.
+
+    This algorithm uses triangular patterns (stars) for exploration, where each triangle
+    undergoes three types of transformations:
+    - R-triangles: Formed using centroids and minimum fitness points
+    - Q-triangles: Created through rotation around random axes
+    - U-triangles: Generated through compression towards minimum fitness points
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        k: Coefficient for R-triangle formation. Controls the spread of new points
+            around the best solutions.
+        compression_rate: Rate of compression for U-triangles towards best points.
+            Higher values lead to more aggressive local search.
+        a: Amplitude for parallel transfer operations. Controls step size in solution space.
+        epochs: Maximum number of iterations.
+        size: Population size. Should be divisible by 3 for optimal triangle formation.
+        halt_criteria: Optional convergence criteria to stop optimization before reaching maximum epochs.
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],
         k: int = 3,
         compression_rate: float = 4.0,
-        std: float = 0.1,
         a: int = 3,
-        size: int = 10,
         epochs: int = 50,
+        size: int = 10,
         halt_criteria: HaltCriteria | None = None,
     ):
         super().__init__(epochs, operation, halt_criteria)
         self.size = size
         self.compression_rate = compression_rate
-        self.std = std
         self.k = k
         self.a = a
         self.alpha = np.radians(90)

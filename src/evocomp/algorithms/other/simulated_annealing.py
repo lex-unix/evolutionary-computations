@@ -10,6 +10,28 @@ from evocomp.core.optimizer import Optimizer
 
 
 class SimulatedAnnealing(Optimizer):
+    """Simulated Annealing (SA) algorithm for global optimization.
+
+    SA is inspired by the annealing process in metallurgy. It uses temperature-based
+    probabilistic acceptance of worse solutions to escape local optima. The algorithm
+    gradually reduces temperature, becoming more selective in accepting solutions.
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        temperature: Initial temperature. Higher values increase the probability
+            of accepting worse solutions early in the search.
+        std: Standard deviation for Gaussian perturbation. Controls the step
+            size when generating new solutions.
+        epochs: Maximum number of iterations.
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs.
+
+    Note:
+        - Uses Gaussian (normal) distribution for generating new solutions
+        - Temperature decreases linearly with iterations (T = T0/iteration)
+        - Maintains only one solution at a time
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],

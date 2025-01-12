@@ -12,6 +12,26 @@ from evocomp.core.optimizer import Optimizer
 
 
 class SymbioticOptimisation(Optimizer):
+    """Symbiotic Organism Search (SOS) algorithm for global optimization.
+
+    SOS mimics the symbiotic relationships among organisms in nature.
+    It uses three phases: mutualism, commensalism, and parasitism.
+
+    Args:
+        operation: Direction of optimization ('min' or 'max').
+        bf1: First benefit factor, controls mutual benefit in mutualism phase.
+            Usually set to either 1 or 2.
+        bf2: Second benefit factor, similar to bf1 but for the second organism.
+            Usually set to either 1 or 2.
+        epochs: Maximum number of iterations.
+        size: Population size (number of organisms).
+        halt_criteria: Optional convergence criteria to stop optimization
+            before reaching maximum epochs.
+
+    Note:
+        - Benefit factors (bf1, bf2) are typically randomly chosen between 1 and 2
+    """
+
     def __init__(
         self,
         operation: Literal['min', 'max'],
