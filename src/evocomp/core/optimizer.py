@@ -18,7 +18,7 @@ class Optimizer(ABC):
 
     @property
     def epochs(self) -> int:
-        return len(self.__history)
+        return len(self.__history) - 1
 
     @property
     def history(self) -> list[Candidate]:

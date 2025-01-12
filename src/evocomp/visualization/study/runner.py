@@ -23,7 +23,7 @@ def study(
                 history=algorithm.history,
                 param_value=value,
                 time=time.time() - start,
-                epochs=len(algorithm.history),
+                epochs=algorithm.epochs,
             )
         )
     return results
