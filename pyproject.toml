@@ -1,7 +1,7 @@
 [project]
 name = "evocomp"
 version = "0.1.0"
-authors = [{ name = "Lex Miiin", email = "hello@lexunix.me" }]
+authors = [{ name = "Lex Miin", email = "hello@lexunix.me" }]
 description = "Evolutionary algorithms implementation"
 readme = "README.md"
 requires-python = ">=3.9"
