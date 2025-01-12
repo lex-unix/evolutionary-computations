@@ -21,7 +21,7 @@ build-backend = "hatchling.build"
 dev-mode-dirs = ["src"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/evocomp", "src/delivery"]
+packages = ["src/evocomp"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

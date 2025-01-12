@@ -14,9 +14,9 @@ visualization.display(study_results)
 Parameter Study Results:
 Parameter     Fitness        Solution               Epochs     Time(s)
 -------------------------------------------------------------------------
-60            -0.999915      3.145021, 3.148316     21         0.22
-100           -0.999965      3.143419, 3.137123     21         0.38
-140           -0.999999      3.141046, 3.14229      21         0.52
+60            -0.999915      3.145021, 3.148316     20         0.22
+100           -0.999965      3.143419, 3.137123     20         0.38
+140           -0.999999      3.141046, 3.14229      20         0.52
 """
 
 # Using custom display config
@@ -37,13 +37,13 @@ Function:  Easom
 Parameter Study Results:
 Lambda     Fitness        Solution         Epochs     Time(s)
 ----------------------------------------------------------------
-60         -1.000         3.145, 3.148     21         0.221
-100        -1.000         3.143, 3.137     21         0.380
-140        -1.000         3.141, 3.142     21         0.517
+60         -1.000         3.145, 3.148     20         0.221
+100        -1.000         3.143, 3.137     20         0.380
+140        -1.000         3.141, 3.142     20         0.517
 """
 
 # Plot results using matplotlib and save
-visualization.plot_histories(study_results, 'lambda', 'Easom', 'Evolutionary Strategy', save=False)
+visualization.plot_histories(study_results, 'lambda', 'Easom', 'Evolutionary Strategy', save=True)
 
 # Export as csv
 visualization.export_results(study_results, 'study_results', 'csv')

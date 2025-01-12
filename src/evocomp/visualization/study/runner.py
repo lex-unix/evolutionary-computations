@@ -1,5 +1,6 @@
 import time
 from typing import Callable
+from typing import Sequence
 
 from evocomp.core.objective import Objective
 from evocomp.core.optimizer import Optimizer
@@ -7,7 +8,7 @@ from evocomp.visualization.study.result import StudyResult
 
 
 def study(
-    param_values: list[int | float],
+    param_values: Sequence[int | float],
     objective: Objective,
     setup: Callable[[int | float], Optimizer],
 ) -> list[StudyResult]:
