@@ -162,5 +162,3 @@ cython_debug/
 #.idea/
 
 /.direnv/
-/out/**/*
-!/out/.gitkeep
