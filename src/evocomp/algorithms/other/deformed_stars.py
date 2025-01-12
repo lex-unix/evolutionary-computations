@@ -1,5 +1,6 @@
 import copy
 from random import sample
+from typing import Literal
 
 import numpy as np
 from numpy import random
@@ -14,6 +15,7 @@ from evocomp.core.optimizer import Optimizer
 class DeformedStars(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         k: int = 3,
         compression_rate: float = 4.0,
         std: float = 0.1,
@@ -22,7 +24,7 @@ class DeformedStars(Optimizer):
         epochs: int = 50,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.size = size
         self.compression_rate = compression_rate
         self.std = std

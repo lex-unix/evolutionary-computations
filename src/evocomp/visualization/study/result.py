@@ -10,6 +10,6 @@ class StudyResult:
     fitness: float
     solution: NDArray
     history: list[Candidate]
-    param_value: int | float
+    param_value: str
     time: float
     epochs: int

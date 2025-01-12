@@ -13,6 +13,7 @@ from evocomp.core.optimizer import Optimizer
 class EvoStrategy(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         lmda: int = 100,
         mu: int = 20,
         std: float = 0.5,
@@ -20,11 +21,10 @@ class EvoStrategy(Optimizer):
         epochs: int = 100,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.lmda = lmda
         self.mu = mu
         self.strategy = strategy
-        self.epochs = epochs
         self.std = std
 
     def __evaluate_population(

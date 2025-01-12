@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from evocomp.algorithms.swarm.aco import AntColonyOptimization
+import evocomp
 
 max_delivery_radius = 2
 
@@ -102,7 +102,7 @@ for idx, courier in couriers.iterrows():
 
             sectors[courier_sector] = sectors[courier_sector].drop(parcel_idx)
 
-    couriers.loc[idx, 'assigned_parcels'] = json.dumps(assigned_parcels)
+    couriers.loc[idx, 'assigned_parcels'] = json.dumps(assigned_parcels)  # type: ignore
 
     if len(assigned_parcels) > 0:
         print(
@@ -126,7 +126,7 @@ for idx, courier in couriers_multi_parcels.iterrows():
     else:
         heuristic = heuristic_pedestrian(courier_dist, walk_speed, hourly_salary)
 
-    aco = AntColonyOptimization(n_ants=100, rho=0.03, alpha=1.6, beta=1.25)
+    aco = evocomp.AntColonyOptimization(n_ants=100, rho=0.03, alpha=1.6, beta=1.25)
     route, dist = aco.solve(courier_dist, heuristic)
     if courier['type'] == 'vehicle':
         cost = vehicle_cost(dist, drive_speed, hourly_salary, fuel_cost_per_km)

@@ -5,7 +5,7 @@ offspring_sizes = [60, 100, 140]
 study_results = visualization.study(
     param_values=offspring_sizes,
     objective=evocomp.Easom(),
-    setup=lambda offspring_size: evocomp.EvoStrategy(lmda=offspring_size, epochs=20),
+    setup=lambda offspring_size: evocomp.EvoStrategy(lmda=offspring_size, operation='min', epochs=20),
 )
 
 # Displaying results to console

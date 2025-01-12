@@ -32,13 +32,14 @@ pip install -e .
 import evocomp
 
 # Basic usage with Differential Evolution
-optimizer = evocomp.DifferentialEvolution(f=2, epochs=100)
+optimizer = evocomp.DifferentialEvolution(f=2, operation='min', epochs=100)
 optimizer.optimize(evocomp.Easom())
 print(optimizer.best_candidate)
 
-# Using convergence criteria
+# Using convergence criteria and maximizing function instead
 optimizer = evocomp.DifferentialEvolution(
     f=2,
+    operation='max',
     halt_criteria=evocomp.FitnessConvergence(e=0.001)
 )
 optimizer.optimize(evocomp.Easom())
@@ -57,7 +58,7 @@ from evocomp.visualization import study, display, plot_histories
 
 results = study(
     param_values=[0.1, 0.2, 0.3],
-    setup=lambda x: evocomp.DifferentialEvolution(f=x),
+    setup=lambda x: evocomp.DifferentialEvolution(f=x, operation='min'),
     objective=evocomp.Easom()
 )
 

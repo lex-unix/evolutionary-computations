@@ -30,6 +30,9 @@ class FitnessConvergence(HaltCriteria):
         diff = np.abs(parents_mean - children_mean)
         return diff < self.e
 
+    def __str__(self) -> str:
+        return 'Fitness Convergence'
+
 
 class SolutionConvergence(HaltCriteria):
     def __init__(self, e: float) -> None:
@@ -44,3 +47,6 @@ class SolutionConvergence(HaltCriteria):
                 if distance > max_distance:
                     max_distance = distance
         return max_distance < self.e
+
+    def __str__(self) -> str:
+        return 'Solution Convergence'

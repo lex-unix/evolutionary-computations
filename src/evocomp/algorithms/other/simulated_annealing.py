@@ -1,3 +1,5 @@
+from typing import Literal
+
 import numpy as np
 from numpy import random
 
@@ -10,12 +12,13 @@ from evocomp.core.optimizer import Optimizer
 class SimulatedAnnealing(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         temperature: float,
         std: float,
         epochs: int = 500,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.temperature = temperature
         self.std = std
         self.iteration = 0

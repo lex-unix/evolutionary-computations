@@ -10,7 +10,7 @@ def calculate_column_widths(
     columns: dict[str, Column],
     config: DisplayConfig,
 ) -> dict[str, int]:
-    param_values_width = max(len(str(r.param_value)) for r in results)
+    param_values_width = max(len(r.param_value) for r in results)
     param_width = max(len(config.param_name), param_values_width, columns['param'].min_width)
 
     first_solution = np.round(results[0].solution, config.float_precision)

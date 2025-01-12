@@ -1,3 +1,5 @@
+from typing import Literal
+
 import numpy as np
 from numpy import random
 from numpy.typing import NDArray
@@ -11,13 +13,14 @@ from evocomp.core.optimizer import Optimizer
 class DifferentialEvolution(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         f: float,
         epochs: int = 100,
         size: int = 100,
         crossover_rate: float = 0.3,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.size = size
         self.crossover_rate = crossover_rate
         self.f = f

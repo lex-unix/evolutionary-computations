@@ -1,3 +1,5 @@
+from typing import Literal
+
 import numpy as np
 from numpy import random
 
@@ -10,12 +12,13 @@ from evocomp.core.optimizer import Optimizer
 class BeeColony(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         max_stagnation=10,
         size=100,
         epochs=100,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.size = size
         self.max_stagnation = max_stagnation
         self.__stagnation_count = [0] * size

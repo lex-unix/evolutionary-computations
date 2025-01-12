@@ -1,3 +1,4 @@
+from typing import Literal
 from typing import Tuple
 
 import numpy as np
@@ -13,6 +14,7 @@ from evocomp.core.optimizer import Optimizer
 class FractalStructurization(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         m: int = 7,
         temperature: float = 100,
         std: float = 0.1,
@@ -20,7 +22,7 @@ class FractalStructurization(Optimizer):
         epochs: int = 20,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.size = size
         self.m = m
         self.std = std

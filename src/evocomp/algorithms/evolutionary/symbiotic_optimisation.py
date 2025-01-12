@@ -1,4 +1,5 @@
 import copy
+from typing import Literal
 
 import numpy as np
 from numpy import random
@@ -13,13 +14,14 @@ from evocomp.core.optimizer import Optimizer
 class SymbioticOptimisation(Optimizer):
     def __init__(
         self,
+        operation: Literal['min', 'max'],
         bf1: int,
         bf2: int,
         epochs: int = 100,
         size: int = 100,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, halt_criteria)
+        super().__init__(epochs, operation, halt_criteria)
         self.bf1 = bf1
         self.bf2 = bf2
         self.size = size

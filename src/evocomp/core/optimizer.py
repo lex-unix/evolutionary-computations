@@ -1,5 +1,6 @@
 from abc import ABC
 from abc import abstractmethod
+from typing import Literal
 
 from evocomp.core.candidate import Candidate
 from evocomp.core.halt_criteria import HaltCriteria
@@ -7,10 +8,16 @@ from evocomp.core.objective import Objective
 
 
 class Optimizer(ABC):
-    def __init__(self, epochs: int, halt_criteria: HaltCriteria | None = None) -> None:
+    def __init__(
+        self,
+        epochs: int,
+        operation: Literal['min', 'max'],
+        halt_criteria: HaltCriteria | None = None,
+    ) -> None:
         self.__epochs = epochs if halt_criteria is None else float('inf')
         self.__halt_criteria = halt_criteria
         self.__history: list[Candidate] = []
+        self.__operation = operation
 
     @property
     def best_candidate(self) -> Candidate:
@@ -55,7 +62,7 @@ class Optimizer(ABC):
 
     def __select_best(self, population: list[Candidate]) -> Candidate:
         population_sorted = sorted(population, key=lambda x: x.fitness)
-        return population_sorted[0]
+        return population_sorted[0] if self.__operation == 'min' else population_sorted[-1]
 
     def __should_halt(self, children: list[Candidate], parents: list[Candidate]) -> bool:
         return self.__halt_criteria is not None and self.__halt_criteria.halt(children, parents)
