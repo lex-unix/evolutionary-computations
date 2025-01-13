@@ -1,9 +1,7 @@
-import copy
 from typing import Literal
 
 import numpy as np
 from numpy import random
-from numpy.typing import NDArray
 
 from evocomp.core.candidate import Candidate
 from evocomp.core.halt_criteria import HaltCriteria
@@ -46,67 +44,77 @@ class SymbioticOptimisation(Optimizer):
         self.bf2 = bf2
         self.size = size
 
-    def __evaluate(self, candidate: Candidate, objective: Objective):
-        candidate.fitness = objective.evaluate(candidate.solution)
-
     def __get_random_index(self, current_index: int):
         idx_pool = np.delete(np.arange(self.size), current_index)
         return random.choice(idx_pool)
 
-    def __create_parasite(self, candidate: Candidate, bounds: NDArray) -> Candidate:
-        parasite = copy.deepcopy(candidate)
-        random_index = random.randint(len(parasite.solution))
-        parasite.solution[random_index] = random.uniform(-1, 1)
-        return parasite
+    def __mutualism_phase(
+        self,
+        i: int,
+        x_best: Candidate,
+        population: list[Candidate],
+        new_population: list[Candidate],
+        objective: Objective,
+    ):
+        j = self.__get_random_index(i)
+        xj = population[j]
+        xi = population[i]
+        mutual = (xi.solution + xj.solution) / 2
+        xi_new = xi.solution + random.rand() * (x_best.solution - mutual * self.bf1)
+        xj_new = xj.solution + random.rand() * (x_best.solution - mutual * self.bf2)
+        xi_new = self._clip_bounds(xi_new, objective.bounds)
+        xj_new = self._clip_bounds(xj_new, objective.bounds)
+        xi_new = Candidate(xi_new, objective.evaluate(xi_new))
+        xj_new = Candidate(xj_new, objective.evaluate(xj_new))
+        new_population[i] = self._compare_candidates(xi, xi_new)
+        new_population[j] = self._compare_candidates(xj, xj_new)
+
+    def __commensalism_phase(
+        self,
+        i: int,
+        x_best: Candidate,
+        population: list[Candidate],
+        new_population: list[Candidate],
+        objective: Objective,
+    ):
+        j = self.__get_random_index(i)
+        xj = population[j]
+        xi = population[i]
+        xi_new = xi.solution + random.uniform(-1, 1) * (x_best.solution - xj.solution)
+        xi_new = self._clip_bounds(xi_new, objective.bounds)
+        xi_new = Candidate(xi_new, objective.evaluate(xi_new))
+        new_population[i] = self._compare_candidates(xi_new, xi)
+
+    def __parasite_phase(
+        self,
+        i: int,
+        population: list[Candidate],
+        new_population: list[Candidate],
+        objective: Objective,
+    ):
+        j = self.__get_random_index(i)
+        xj = population[j]
+        xi = population[i]
+        parasite_solution = xi.solution.copy()
+        random_index = random.randint(len(parasite_solution))
+        parasite_solution[random_index] = random.uniform(-1, 1)
+        x_parasite = Candidate(parasite_solution, objective.evaluate(parasite_solution))
+        new_population[j] = self._compare_candidates(x_parasite, xj)
 
     def generate_init_population(self, objective: Objective) -> list[Candidate]:
         bounds = objective.bounds
-        pop = random.uniform(bounds[:, 0], bounds[:, 1], (self.size, len(bounds)))
-        population = [Candidate(x) for x in pop]
-        for candidate in population:
-            self.__evaluate(candidate, objective)
-        return population
+        solutions = random.uniform(bounds[:, 0], bounds[:, 1], (self.size, len(bounds)))
+        return [Candidate(x, objective.evaluate(x)) for x in solutions]
 
     def compute_next_population(
         self,
         population: list[Candidate],
         objective: Objective,
     ) -> list[Candidate]:
-        population = sorted(population, key=lambda x: x.fitness)
-        new_population = population[:]
-        best_solution = population[0].solution
+        new_population = population.copy()
+        x_best = self._select_best(population)
         for i in range(len(population)):
-            j = self.__get_random_index(i)
-
-            mutual = (population[i].solution + population[j].solution) / 2
-            i_new = population[i].solution + random.rand() * (best_solution - mutual * self.bf1)
-            j_new = population[j].solution + random.rand() * (best_solution - mutual * self.bf2)
-
-            i_new = Candidate(i_new)
-            j_new = Candidate(j_new)
-            self.__evaluate(i_new, objective)
-            self.__evaluate(j_new, objective)
-
-            if i_new.fitness < population[i].fitness:
-                new_population[i] = i_new
-            if j_new.fitness < population[j].fitness:
-                new_population[j] = j_new
-
-            j = self.__get_random_index(i)
-
-            i_new = population[i].solution + random.uniform(-1, 1) * (
-                best_solution - population[j].solution
-            )
-            i_new = Candidate(i_new)
-            self.__evaluate(i_new, objective)
-
-            if i_new.fitness < population[i].fitness:
-                new_population[i] = i_new
-
-            parasite = self.__create_parasite(population[i], objective.bounds)
-            self.__evaluate(parasite, objective)
-
-            if parasite.fitness < population[i].fitness:
-                new_population[i] = parasite
-
+            self.__mutualism_phase(i, x_best, population, new_population, objective)
+            self.__commensalism_phase(i, x_best, population, new_population, objective)
+            self.__parasite_phase(i, population, new_population, objective)
         return new_population

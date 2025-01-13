@@ -59,12 +59,12 @@ class EvoStrategy(Optimizer):
     ) -> list[Candidate]:
         for candidate in population:
             candidate.fitness = objective.evaluate(candidate.solution)
-        sorted_population = sorted(population, key=lambda x: x.fitness)[: self.mu]
+        sorted_population = self._sort_population(population)[: self.mu]
         return sorted_population
 
     def __create_offspring(self, parent: Candidate, bounds: NDArray) -> Candidate:
         child_solution = parent.solution + self.std * np.random.randn(len(bounds))
-        child_solution = np.clip(child_solution, bounds[:, 0], bounds[:, 1])
+        child_solution = self._clip_bounds(child_solution, bounds)
         return Candidate(child_solution)
 
     def generate_init_population(self, objective: Objective) -> list[Candidate]:

@@ -51,10 +51,6 @@ class DeformedStars(Optimizer):
         self.alpha = np.radians(90)
         self.beta = np.radians(140)
 
-    def __get_best(self, population: list[Candidate]):
-        best = sorted(population, key=lambda x: x.fitness)[0]
-        return best.solution, best.fitness
-
     def __get_random_indexes(self):
         i = random.choice(np.arange(self.size), size=self.size, replace=False)
         j = np.zeros(self.size, dtype=int)
@@ -66,54 +62,10 @@ class DeformedStars(Optimizer):
         return i, j
 
     def __correct_bounds(self, candidate: Candidate, objective: Objective):
-        x_bounds, y_bounds = objective.bounds
-        x, y = candidate.solution
-
-        if x < x_bounds[0] or x > x_bounds[1]:
-            x = random.uniform(x_bounds[0], x_bounds[1])
-        if y < y_bounds[0] or y > y_bounds[1]:
-            y = random.uniform(y_bounds[0], y_bounds[1])
-
-        candidate.solution = np.array([x, y])
-
-    def __correct_bounds_nd(self, candidate: Candidate, objective: Objective):
         for i, bound in enumerate(objective.bounds):
             if candidate.solution[i] < bound[0] or candidate.solution[i] > bound[1]:
                 candidate.solution[i] = random.uniform(bound[0], bound[1])
         return candidate
-
-    def __parallel_transfer(self, candidate: Candidate):
-        x, y = candidate.solution
-        x_new = x + self.a * np.cos(self.alpha)
-        y_new = y + self.a * np.sin(self.alpha)
-        return Candidate(np.array([x_new, y_new]))
-
-    def __rotate(self, candidate_a: Candidate, candidate_b: Candidate):
-        x_a, y_a = candidate_a.solution
-        x_b, y_b = candidate_b.solution
-        if candidate_a.fitness < candidate_b.fitness:
-            x_new = x_b + (x_b - x_a) * np.cos(self.beta) - (y_b - y_a) * np.sin(self.beta)
-            y_new = y_b + (x_b - x_a) * np.sin(self.beta) + (y_b - y_a) * np.cos(self.beta)
-            new_candidate = Candidate(np.array([x_new, y_new]))
-            return candidate_a, new_candidate
-        else:
-            x_new = x_a + (x_a - x_b) * np.cos(self.beta) - (y_a - y_b) * np.sin(self.beta)
-            y_new = y_a + (x_a - x_b) * np.sin(self.beta) + (y_a - y_b) * np.cos(self.beta)
-            new_candidate = Candidate(np.array([x_new, y_new]))
-            return candidate_b, new_candidate
-
-    def __compress(self, candidate_a: Candidate, candidate_b: Candidate):
-        x_a, y_a = candidate_a.solution
-        x_b, y_b = candidate_b.solution
-
-        x_new = (x_a + x_b) / self.compression_rate
-        y_new = (y_a + y_b) / self.compression_rate
-        new_candidate = Candidate(np.array([x_new, y_new]))
-
-        if candidate_a.fitness < candidate_b.fitness:
-            return candidate_a, new_candidate
-        else:
-            return candidate_b, new_candidate
 
     def __form_triangles(self, population: list[Candidate]) -> list[list[Candidate]]:
         triangles = []
@@ -132,12 +84,12 @@ class DeformedStars(Optimizer):
             centroids.append(centroid)
         return centroids
 
-    def __find_min_fitness_points(self, triangles: list[list[Candidate]]) -> list[Candidate]:
-        min_fitness_points = []
+    def __find_optimal_fitness_points(self, triangles: list[list[Candidate]]) -> list[Candidate]:
+        fitness_points = []
         for triangle in triangles:
-            min_point = min(triangle, key=lambda candidate: candidate.fitness)
-            min_fitness_points.append(min_point)
-        return min_fitness_points
+            point = self._select_best(triangle)
+            fitness_points.append(point)
+        return fitness_points
 
     def __get_r_triangles(
         self, triangle: list[Candidate], centroid: NDArray, min_point: Candidate
@@ -154,12 +106,12 @@ class DeformedStars(Optimizer):
             rotation_axis = np.random.choice(
                 np.arange(len(objective.bounds)), size=2, replace=False
             )
-            k, L = rotation_axis
+            k, l = rotation_axis
             temp_k = point.solution[k]
-            point.solution[k] = point.solution[k] * np.cos(self.alpha) - point.solution[L] * np.sin(
+            point.solution[k] = point.solution[k] * np.cos(self.alpha) - point.solution[l] * np.sin(
                 self.alpha
             )
-            point.solution[L] = temp_k * np.sin(self.alpha) + point.solution[L] * np.cos(self.alpha)
+            point.solution[l] = temp_k * np.sin(self.alpha) + point.solution[l] * np.cos(self.alpha)
         return triangle_new
 
     def __get_u_triangle(self, triangle: list[Candidate], min_point: Candidate):
@@ -183,7 +135,7 @@ class DeformedStars(Optimizer):
             for i in range(bounds_len):
                 x[i] = random.uniform(bounds[i, 0], bounds[i, 1])
             population.append(Candidate(x))
-        self.compute_fitness(population, objective)
+        self._compute_fitness(population, objective)
         return population
 
     def compute_next_population(
@@ -191,21 +143,21 @@ class DeformedStars(Optimizer):
     ) -> list[Candidate]:
         triangles = self.__form_triangles(population)
         centroids = self.__find_centroids(triangles)
-        min_fitness_points = self.__find_min_fitness_points(triangles)
+        fitness_points = self.__find_optimal_fitness_points(triangles)
 
         triangles_r = [
             self.__get_r_triangles(t, c, m)
-            for (t, c, m) in zip(triangles, centroids, min_fitness_points)
+            for (t, c, m) in zip(triangles, centroids, fitness_points)
         ]
         triangles_q = [self.__get_q_triangle(t, objective) for t in triangles]
-        triangles_u = [self.__get_u_triangle(t, m) for t, m in zip(triangles, min_fitness_points)]
+        triangles_u = [self.__get_u_triangle(t, m) for t, m in zip(triangles, fitness_points)]
 
         combined_population = [
-            self.__correct_bounds_nd(candidate, objective)
+            self.__correct_bounds(candidate, objective)
             for triangle in (triangles_r + triangles_q + triangles_u)
             for candidate in triangle
         ]
-        self.compute_fitness(combined_population, objective)
-        new_population = sorted(combined_population, key=lambda x: x.fitness)[: self.size]
+        self._compute_fitness(combined_population, objective)
+        new_population = self._sort_population(combined_population)[: self.size]
 
         return new_population

@@ -2,6 +2,9 @@ from abc import ABC
 from abc import abstractmethod
 from typing import Literal
 
+import numpy as np
+from numpy.typing import NDArray
+
 from evocomp.core.candidate import Candidate
 from evocomp.core.halt_criteria import HaltCriteria
 from evocomp.core.objective import Objective
@@ -88,21 +91,32 @@ class Optimizer(ABC):
             next_population = self.compute_next_population(population, objective)
             self.__record_solutions(next_population)
             if self.__should_halt(next_population, population):
-                return self.__select_best(next_population)
+                return self._select_best(next_population)
             population = next_population
             epoch += 1
-        return self.__select_best(population)
+        return self._select_best(population)
 
-    def compute_fitness(self, population: list[Candidate], objective: Objective):
+    def _compute_fitness(self, population: list[Candidate], objective: Objective):
         for candidate in population:
             candidate.fitness = objective.evaluate(candidate.solution)
 
-    def __select_best(self, population: list[Candidate]) -> Candidate:
-        population_sorted = sorted(population, key=lambda x: x.fitness)
-        return population_sorted[0] if self.__operation == 'min' else population_sorted[-1]
+    def _sort_population(self, population: list[Candidate]):
+        return sorted(population, key=lambda x: x.fitness, reverse=self.__operation == 'max')
+
+    def _compare_candidates(self, one: Candidate, another: Candidate) -> Candidate:
+        if self.__operation == 'min':
+            return one if one.fitness < another.fitness else another
+        else:
+            return one if one.fitness > another.fitness else another
+
+    def _select_best(self, population: list[Candidate]) -> Candidate:
+        return self._sort_population(population)[0]
+
+    def _clip_bounds(self, solution: NDArray, bounds: NDArray) -> NDArray:
+        return np.clip(solution, bounds[:, 0], bounds[:, 1])
 
     def __should_halt(self, children: list[Candidate], parents: list[Candidate]) -> bool:
         return self.__halt_criteria is not None and self.__halt_criteria.halt(children, parents)
 
     def __record_solutions(self, population: list[Candidate]):
-        self.__history.append(self.__select_best(population))
+        self.__history.append(self._select_best(population))

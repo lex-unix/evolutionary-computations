@@ -136,7 +136,7 @@ class FractalStructurization(Optimizer):
         bounds = objective.bounds
         pop = random.uniform(bounds[:, 0], bounds[:, 1], (self.size, len(bounds)))
         population = [Candidate(x) for x in pop]
-        self.compute_fitness(population, objective)
+        self._compute_fitness(population, objective)
         self.iteration = 0
         return population
 
@@ -148,11 +148,11 @@ class FractalStructurization(Optimizer):
         population_v = self.__population_v(population, objective)
         population_v = population_v + population
         population_c = self.__population_c(self.__form_pairs(population_v), objective)
-        self.compute_fitness(population_v, objective)
-        population_v = sorted(population_v, key=lambda x: x.fitness)
+        self._compute_fitness(population_v, objective)
+        population_v = self._sort_population(population_v)
         population_w = self.__population_w(population_v, objective)
         new_population = population_v + population_c + population_w
-        self.compute_fitness(new_population, objective)
-        new_population = sorted(new_population, key=lambda x: x.fitness)[: self.size]
+        self._compute_fitness(new_population, objective)
+        new_population = self._sort_population(new_population)[: self.size]
         self.iteration += 1
         return new_population

@@ -63,7 +63,7 @@ class BeeColony(Optimizer):
         for i in range(self.__size):
             bee = population[i]
             new_solution = self.__food_source(population, i)
-            new_solution = np.clip(new_solution, objective.bounds[:, 0], objective.bounds[:, 1])
+            new_solution = self._clip_bounds(new_solution, objective.bounds)
             fitness = objective.evaluate(new_solution)
             new_bee = Candidate(new_solution, fitness)
 
@@ -77,7 +77,7 @@ class BeeColony(Optimizer):
         for i in range(self.__size):
             if random.random() < probabilities[i]:
                 new_solution = self.__food_source(population, i)
-                new_solution = np.clip(new_solution, objective.bounds[:, 0], objective.bounds[:, 1])
+                new_solution = self._clip_bounds(new_solution, objective.bounds)
                 fitness = objective.evaluate(new_solution)
                 new_bee = Candidate(new_solution, fitness)
 
