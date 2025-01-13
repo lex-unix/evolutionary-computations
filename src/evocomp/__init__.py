@@ -1,5 +1,6 @@
 from .algorithms.evolutionary.diff_evolution import DifferentialEvolution
 from .algorithms.evolutionary.evo_strategy import EvoStrategy
+from .algorithms.evolutionary.symbiotic_optimisation import SymbioticOptimisation
 from .algorithms.other.deformed_stars import DeformedStars
 from .algorithms.other.fractal_structurization import FractalStructurization
 from .algorithms.other.simulated_annealing import SimulatedAnnealing
@@ -21,6 +22,7 @@ __all__ = [
     # Algorithms
     'DifferentialEvolution',
     'EvoStrategy',
+    'SymbioticOptimisation',
     'DeformedStars',
     'FractalStructurization',
     'SimulatedAnnealing',
@@ -39,4 +41,3 @@ __all__ = [
     'Sphere3D',
     'Optimizer',
 ]
-
