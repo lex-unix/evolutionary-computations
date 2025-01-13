@@ -1,5 +1,3 @@
-from typing import Literal
-
 import numpy as np
 from numpy import random
 
@@ -27,6 +25,7 @@ class SimulatedAnnealing(Optimizer):
             before reaching maximum epochs.
 
     Note:
+        - Works only on minimization problems
         - Uses Gaussian (normal) distribution for generating new solutions
         - Temperature decreases linearly with iterations (T = T0/iteration)
         - Maintains only one solution at a time
@@ -34,13 +33,12 @@ class SimulatedAnnealing(Optimizer):
 
     def __init__(
         self,
-        operation: Literal['min', 'max'],
         temperature: float,
         std: float,
         epochs: int = 500,
         halt_criteria: HaltCriteria | None = None,
     ):
-        super().__init__(epochs, operation, halt_criteria)
+        super().__init__(epochs, 'min', halt_criteria)
         self.temperature = temperature
         self.std = std
         self.iteration = 0
@@ -61,7 +59,7 @@ class SimulatedAnnealing(Optimizer):
         current_candidate = population[0]
         new_state = current_candidate.solution + random.randn(len(objective.bounds)) * self.std
         new_candidate = Candidate(new_state, objective.evaluate(new_state))
-        t = self.temperature / self.iteration
+        t = self.temperature / (self.iteration + 1)
         diff = new_candidate.fitness - current_candidate.fitness
         if diff < 0 or random.randn() < np.exp(-diff / t):
             current_candidate = new_candidate
